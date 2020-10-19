@@ -1,7 +1,7 @@
 This repository contains homework and project ideas for Cultural Data Science 2020/21
 Below, I will describe my current project idea. It involves mapping data from all refugees twho came to Denmark between 1990 and 2020. Furthermore, I would like to visualize this interactively on the world map.
-"
-The data is from " StatBank Denmark" and link to the specific data is provided here: https://www.statbank.dk/VAN5
+
+The data is from StatBank Denmark and link to the specific data is provided here: https://www.statbank.dk/VAN5
 
 Firstly, I downloaded the table as a .csv file before I loaded the necessary packages and data in R. In order to be able to work with the data some columns and rows were removed.
 
