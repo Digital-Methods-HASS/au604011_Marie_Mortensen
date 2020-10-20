@@ -71,7 +71,7 @@ We now have the following columns
 `Year` | The year asylum was sought | ---
 `No_seek` | the number of asylum seekers | ---
 
-Column overview |  | 
+Column overview   | 
 --- | --- | 
 `Country` | the citizenship of the asylum seekers |
 `Year` | The year asylum was sought | 
