@@ -58,9 +58,11 @@ head(summed_asylum_dk)
 ```
 
 We now have the following columns
-Year - the year asylum was sought
-Country - the citizenship of the asylum seekers
-No_migrants - the number of asylum seekers
 
+| Column overview                                       |
+| ------------- |:-------------------------------------:|
+| Country       | the citizenship of the asylum seekers |
+| Year          | the year asylum was sought            |
+| No_seek       | the number of asylum seekers          |
 
 
