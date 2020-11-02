@@ -1,0 +1,118 @@
+---
+title: "Scraping a soccer fan forum"
+author: "Marie Mortensen"
+date: "10/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+pacman::p_load(tidyverse, # General-purpose data wrangling
+               rvest, # Parsing of HTML/XML files 
+               stringr,# String manipulation
+               rebus, # Verbose regular expressions
+               lubridate, # Eases DateTime manipulation
+               tidytext)
+```
+
+
+```{r}
+#reading stopwords list to remove uninteresting words
+dk_stop <- data.frame(word = stopwords::stopwords("danish"))
+
+#pasting site where fanforum is
+url_aab <- "http://www.debatside.dk/viewtopic.php?f=1&t=13745"  
+# it looks like it says &start=20 for second page page and then +20 for every page
+
+aab <-  read_html(url_aab)
+aab_text <- aab %>% 
+  html_nodes('.content') %>% #defining what to extract from the website
+  html_text() %>% #making it text
+  str_trim() %>% #removing whitespaces
+  unlist() %>% 
+  as.data.frame()
+
+all_pages <- aab_text
+pages <- seq(from =20, to =1980, by=20) #making a sequence from 20 to 1980 with breaks of 20 in between to define the different urls and pages to extract text from
+
+for (i in pages) { #this takes all the numbers in the list pages and performs the actions below
+  new_url <- paste("http://www.debatside.dk/viewtopic.php?f=1&t=13745&start", i, sep = "=")
+  
+  text <- new_url %>% 
+  read_html() %>% 
+  html_nodes('.content') %>% 
+  html_text() %>% 
+  str_trim() %>% 
+  unlist() %>% 
+  as.data.frame()
+
+all_pages <- rbind(all_pages, text)
+}
+
+colnames(all_pages) <- "words"
+all_pages <- all_pages %>% mutate(words = as.character(words))
+
+##UNIGRAM 
+#inspecting what words are most frequent
+sentences <- all_pages %>%
+  # str_remove_all("window.open(this.href)")
+  str_remove_all("[/;:?.-]") %>% 
+  # str_remove_all("http|skrev|onclick|window|open|this|ref") %>% 
+  str_to_lower() #lowercase
+
+
+
+words <- sentences %>% 
+  strsplit(" ") %>% #split every time there is whitespace
+  unlist() %>% 
+  as.data.frame() %>%
+  na_if("") %>% # recode empty strings "" by NAs
+  na.omit() # remove NAs
+
+colnames(words) <- "word"
+words <- words %>% 
+  anti_join(dk_stop, by = "word") #removing all stopwords
+
+words %>% 
+  filter(word !='onclick=\\"windowopen(thishref)return') %>% 
+  count(word, sort = TRUE)  %>% 
+  slice(1:10) %>% 
+  ggplot() + 
+  geom_bar(aes(word, n), 
+           stat = "identity", 
+           fill = "skyblue") +
+  theme_minimal() +
+  labs(title = "Top words in AAB fans club",
+       caption = "Data Source: http://www.debatside.dk/viewtopic.php?f=1&t=13745")
+
+
+#BIGRAMS
+#which to words often occur together?
+sentences <- as.character(sentences) %>% as.data.frame()
+colnames(sentences) <- "txt" 
+
+  sentences %>% 
+    # filter(txt != "") %>% 
+    unnest_tokens(word, txt, token = "ngrams", n = 2) %>% #split column into rows with two words per row
+  #below we test whether the words occur in the stoplists 
+  separate(word, c("word1", "word2"), sep = " ") %>% 
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word) %>% 
+  unite(word,word1, word2, sep = " ") %>% 
+    filter(word != "windowopen thishref" &
+           word != "onclick windowopen" & 
+           word != "return false" & 
+           word !="thishref return" &
+             word !="www.bold.dk nyt") %>%   
+  count(word, sort = TRUE) %>% 
+  slice(1:10) %>% #take the 10 most frequent and plot
+  ggplot() + geom_bar(aes(word, n), stat = "identity", fill = "forestgreen") +
+  theme_minimal() +
+  coord_flip() 
+
+  #seems like there isn't anything reaaally exciting on the fans site. there might be some much more tidy ways to filter words but due to lack of time I did not manage to do it :)
+```
+
