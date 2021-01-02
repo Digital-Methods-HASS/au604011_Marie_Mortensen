@@ -1,0 +1,53 @@
+---
+title: "Intro to R"
+author: "Marie Mortensen"
+date: "1/2/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1) 
+Use R to figure out how many elements in the vector below are greater than 2 . (You need to filter out the NAs first)
+
+```{r}
+rooms <- c(1, 2, 1, 3, 1, NA, 3, 1, 3, 2, 1, NA, 1, 8, 3, 1, 4, NA, 1, 3, 1, 2, 1, 7, 1, NA)
+#filtering out NAs
+rooms <- rooms[!is.na(rooms)]
+
+#using indexing ([]) and length() to count the number of room elements above 2
+length(rooms[rooms>2])
+
+```
+There are 8 elements  above 2
+
+## 2) 
+What is the result of running median() function on the above 'rooms' vector? (again, best remove the NAs)
+
+```{r}
+pacman::p_load(tidyverse)
+rooms %>% median() 
+```
+Median is 1.5
+
+## 3) 
+Inside your R Project (.Rproj), install the 'tidyverse' package and use the download.file() and read_csv() function
+to read the SAFI_clean.csv dataset into your R project as 'interviews' digital object
+(see instructions in https://datacarpentry.org/r-socialsci/setup.html and 'Starting with Data' section).
+Take a screenshot of your RStudio interface showing
+a) the script you used to create the object,
+b) the 'interviews' object in the Environment and the
+c) structure of your R project in the bottom right Files pane.
+
+```{r}
+pacman::p_load(tidyverse)
+download.file("https://ndownloader.figshare.com/files/11492171",
+              "../data/SAFI_clean.csv", mode = "wb")
+interviews <- read.csv("../data/SAFI_clean.csv", na = "NULL")
+```
+
+
